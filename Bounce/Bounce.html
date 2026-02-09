@@ -806,10 +806,6 @@ function update() {
         // neutralisé par l'aimant
         scores['cyan'] += 100; // Ajouter 100 points au score
         obstacles.splice(index, 1);
-      } else if (player.type === 'gray' && shrinkActive) {
-        // neutralisé par la réduction : on gagne aussi des points
-        scores['gray'] += 100;
-        obstacles.splice(index, 1);
       } else if (player.type === 'red') {
         // collision normale (si red n'a pas de bouclier) -> game over
         gameOver = true; gameOverScreen();
@@ -830,10 +826,4 @@ update();
 
 </body>
 </html>
-
-
-
-
-
-
 
