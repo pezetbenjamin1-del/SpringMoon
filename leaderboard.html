@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 Classement Mondial - Bounce Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn:hover,
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .leaderboard {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .leaderboard.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    td {
+      padding: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    tbody tr {
+      transition: background 0.3s ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    tbody tr:nth-child(1) {
+      background: rgba(255, 215, 0, 0.15);
+    }
+
+    tbody tr:nth-child(2) {
+      background: rgba(192, 192, 192, 0.15);
+    }
+
+    tbody tr:nth-child(3) {
+      background: rgba(205, 127, 50, 0.15);
+    }
+
+    .rank {
+      font-weight: bold;
+      font-size: 18px;
+      min-width: 30px;
+    }
+
+    .rank-1::before {
+      content: '🥇 ';
+    }
+
+    .rank-2::before {
+      content: '🥈 ';
+    }
+
+    .rank-3::before {
+      content: '🥉 ';
+    }
+
+    .player-name {
+      font-weight: 600;
+      color: #67f4ff;
+    }
+
+    .score {
+      font-weight: bold;
+      color: #ffd700;
+      font-size: 16px;
+    }
+
+    .date {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #aaa;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      background: rgba(102, 126, 234, 0.8);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(102, 126, 234, 1);
+      transform: translateY(-2px);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="/" class="back-btn">← Retour au jeu</a>
+
+  <header>
+    <h1>🏆 Classement Mondial</h1>
+    <p>Les meilleurs scores de tous les joueurs</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-type="all" onclick="switchTab('all', event)">🌍 Tous réunis</button>
+    <button class="tab-btn" data-type="red" onclick="switchTab('red', event)">🔴 Rouge</button>
+    <button class="tab-btn" data-type="blue" onclick="switchTab('blue', event)">🔵 Bleu</button>
+    <button class="tab-btn" data-type="green" onclick="switchTab('green', event)">🟢 Vert</button>
+    <button class="tab-btn" data-type="cyan" onclick="switchTab('cyan', event)">🔷 Cyan</button>
+    <button class="tab-btn" data-type="yellow" onclick="switchTab('yellow', event)">🟡 Jaune</button>
+    <button class="tab-btn" data-type="purple" onclick="switchTab('purple', event)">🟣 Violet</button>
+    <button class="tab-btn" data-type="orange" onclick="switchTab('orange', event)">🟠 Orange</button>
+    <button class="tab-btn" data-type="gray" onclick="switchTab('gray', event)">⬜ Gris</button>
+  </div>
+
+  <div id="all" class="leaderboard active">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div id="red" class="leaderboard">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div id="blue" class="leaderboard">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div id="green" class="leaderboard">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div id="cyan" class="leaderboard">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div id="yellow" class="leaderboard">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div id="purple" class="leaderboard">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div id="orange" class="leaderboard">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div id="gray" class="leaderboard">
+    <div class="leaderboard-table">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cubeNames = {
+  red: '🔴 Rouge',
+  blue: '🔵 Bleu',
+  green: '🟢 Vert',
+  cyan: '🔷 Cyan',
+  yellow: '🟡 Jaune',
+  purple: '🟣 Violet',
+  orange: '🟠 Orange',
+  gray: '🔘 Gris',
+  all: '🌍 Tous réunis'
+};
+
+async function loadLeaderboard(type) {
+  const tabElement = document.getElementById(type);
+  const tableContainer = tabElement.querySelector('.leaderboard-table');
+  tableContainer.innerHTML = '<div class="loading">Chargement...</div>';
+
+  // Essayer de charger depuis le serveur
+  try {
+    const resp = await fetch(`/api/leaderboard?type=${encodeURIComponent(type)}`);
+    if (!resp.ok) throw new Error('Serveur non disponible');
+    const json = await resp.json();
+    let scores = json.scores || [];
+
+    if (!Array.isArray(scores) || scores.length === 0) {
+      tableContainer.innerHTML = '<div class="empty">Aucun score enregistré pour cette catégorie</div>';
+      return;
+    }
+
+    // Construire le HTML du tableau
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 50px;">Rang</th>
+            <th>Joueur</th>
+            ${type === 'all' ? '<th style="width: 120px;">Cube</th>' : ''}
+            <th style="width: 100px;">Score</th>
+            <th style="width: 150px;">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    scores.forEach((score, index) => {
+      const rank = index + 1;
+      const date = new Date(score.timestamp).toLocaleDateString('fr-FR', {
+        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      const cubeName = cubeNames[score.type] || score.type;
+
+      html += `
+        <tr>
+          <td class="rank ${rank <= 3 ? `rank-${rank}` : ''}">${rank}</td>
+          <td class="player-name">${escapeHtml(score.playerName)}</td>
+          ${type === 'all' ? `<td>${cubeName}</td>` : ''}
+          <td class="score">${score.score.toLocaleString('fr-FR')}</td>
+          <td class="date">${date}</td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    tableContainer.innerHTML = html;
+    // Mettre en cache local au besoin
+    try { localStorage.setItem('leaderboard', JSON.stringify(scores)); } catch (e) {}
+  } catch (err) {
+    // Fallback: charger depuis localStorage
+    console.warn('Serveur indisponible, chargement local', err);
+    try {
+      let scores = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+      if (type !== 'all') scores = scores.filter(s => s.type === type);
+      scores.sort((a, b) => b.score - a.score);
+      scores = scores.slice(0, 100);
+      if (scores.length === 0) {
+        tableContainer.innerHTML = '<div class="empty">Aucun score enregistré pour cette catégorie</div>';
+        return;
+      }
+      // reuse rendering above by temporarily assigning json.scores
+      const tmp = { scores };
+      // rappel: ré-appeler la fonction récursivement mais en forçant le rendu sans refetch
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 50px;">Rang</th>
+              <th>Joueur</th>
+              ${type === 'all' ? '<th style="width: 120px;">Cube</th>' : ''}
+              <th style="width: 100px;">Score</th>
+              <th style="width: 150px;">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      tmp.scores.forEach((score, index) => {
+        const rank = index + 1;
+        const date = new Date(score.timestamp).toLocaleDateString('fr-FR', {
+          year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+        const cubeName = cubeNames[score.type] || score.type;
+        html += `
+          <tr>
+            <td class="rank ${rank <= 3 ? `rank-${rank}` : ''}">${rank}</td>
+            <td class="player-name">${escapeHtml(score.playerName)}</td>
+            ${type === 'all' ? `<td>${cubeName}</td>` : ''}
+            <td class="score">${score.score.toLocaleString('fr-FR')}</td>
+            <td class="date">${date}</td>
+          </tr>
+        `;
+      });
+      html += `</tbody></table>`;
+      tableContainer.innerHTML = html;
+    } catch (e) {
+      tableContainer.innerHTML = '<div class="empty">Erreur lors du chargement du classement</div>';
+    }
+  }
+}
+
+function escapeHtml(text) {
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  return (text||'').toString().replace(/[&<>"']/g, m => map[m]);
+}
+
+function switchTab(type, evt) {
+  document.querySelectorAll('.leaderboard').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(type).classList.add('active');
+  if (evt && evt.target) evt.target.classList.add('active');
+  else {
+    const btn = document.querySelector(`.tab-btn[data-type="${type}"]`);
+    if (btn) btn.classList.add('active');
+  }
+  loadLeaderboard(type);
+}
+
+// Charger le classement au démarrage
+document.addEventListener('DOMContentLoaded', () => loadLeaderboard('all'));
+</script>
+
+</body>
+</html>
