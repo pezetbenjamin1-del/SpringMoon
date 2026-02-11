@@ -65,6 +65,34 @@
     font-size: 16px;
     font-family: Arial, sans-serif;
   }
+
+  /* Bouton pouvoir mobile */
+  #powerBtn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    display: none;
+    z-index: 40;
+  }
+
+  #powerBtn:active {
+    transform: scale(0.95);
+  }
+
+  @media (max-width: 768px) {
+    #powerBtn {
+      display: block;
+    }
+  }
 </style>
 </head>
 <body>
@@ -72,6 +100,7 @@
 <canvas id="game" width="600" height="300"></canvas>
 <div id="rechargeBar"><div id="rechargeBarFilled"></div></div>
 <div id="bestRank"></div>
+<button id="powerBtn" onclick="activateAbility()">⚡</button>
 
 <!-- Bouton accès classement (ouvre le fichier local dans un nouvel onglet) -->
 <a id="leaderboardBtn" href="file:///C:/Users/pezet/Documents/Bounce/leaderboard.html" target="_blank" rel="noopener noreferrer" title="Voir le classement">🏆 Classement</a>
@@ -79,13 +108,14 @@
 <!-- Sélecteur de cube -->
 <div id="selector" style="position:absolute;top:20px;left:50%;transform:translateX(-50%);z-index:10;text-align:center;width:90%;display:flex;flex-direction:column;align-items:center;">
   <div style="margin-bottom:10px;font-size:18px;color:#fff;font-weight:bold;">Choisis un cube :</div>
-  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:3px;max-width:700px;">
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:3px;max-width:800px;">
   <button id="redBtn" onclick="selectType('red')" style="background:red;color:#fff;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div>🔴 Rouge</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="redLevel">1</span></div></button>
   <button id="blueBtn" onclick="selectType('blue')" style="background:blue;color:#fff;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div>🔵 Bleu</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="blueLevel">1</span></div></button>
   <button id="greenBtn" onclick="selectType('green')" style="background:green;color:#fff;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div>🟢 Vert</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="greenLevel">1</span></div></button>
-  <button id="orangeBtn" onclick="selectType('orange')" style="background:orange;color:#000;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div>🟠 Orange</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="orangeLevel">1</span></div></button>
   <button id="cyanBtn" onclick="selectType('cyan')" style="background:cyan;color:#000;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:cyan;border:1px solid #000;vertical-align:middle;margin-right:8px;"></span> Cyan</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="cyanLevel">1</span></div></button>
+  <button id="pinkBtn" onclick="selectType('pink')" style="background:#FF69B4;color:#fff;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div>💗 Rose</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="pinkLevel">1</span></div></button>  
   <button id="yellowBtn" onclick="selectType('yellow')" style="background:gold;color:#000;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div>🟡 Jaune</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="yellowLevel">1</span></div></button>
+  <button id="orangeBtn" onclick="selectType('orange')" style="background:orange;color:#000;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div>🟠 Orange</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="orangeLevel">1</span></div></button>
   <button id="purpleBtn" onclick="selectType('purple')" style="background:purple;color:#fff;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div>🟣 Violet</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="purpleLevel">1</span></div></button>
   <button id="grayBtn" onclick="selectType('gray')" style="background:gray;color:#fff;border:none;padding:10px 14px;font-size:16px;margin:5px;border-radius:8px;"><div style="display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:gray;border:1px solid #000;vertical-align:middle;margin-left:23px;"></span> Gris</div><div style="font-size:12px;margin-top:5px;">Meilleur : Niveau <span id="grayLevel">1</span></div></button>
   </div>
@@ -112,7 +142,7 @@ let gameOver = false;
 
 // ====== SCORE ======
 // Scores par cube (individuels)
-  let scores = { red: 0, blue: 0, green: 0, yellow: 0, purple: 0, orange: 0, cyan: 0, gray: 0 }; // Scores par cube (individuels)
+  let scores = { red: 0, blue: 0, green: 0, yellow: 0, purple: 0, orange: 0, cyan: 0, gray: 0, pink: 0 }; // Scores par cube (individuels)
 let bestScore = localStorage.getItem("bestScore") || 0;
 
 // Meilleurs scores pour chaque cube
@@ -124,7 +154,8 @@ let bestScores = {
   purple: localStorage.getItem("bestScore_purple") || 0,
   orange: localStorage.getItem("bestScore_orange") || 0,
   cyan: localStorage.getItem("bestScore_cyan") || 0,
-  gray: localStorage.getItem("bestScore_gray") || 0
+  gray: localStorage.getItem("bestScore_gray") || 0,
+  pink: localStorage.getItem("bestScore_pink") || 0
 };
 
 
@@ -139,6 +170,7 @@ let shieldReady = true; // Le bouclier est prêt à être utilisé
 let shieldDuration = 2000; // Durée du bouclier en ms (2 secondes)
 let shieldCooldown = 10000; // Cooldown en ms (10 secondes)
 let lastShieldTime = 0; // Moment où le bouclier s'est terminé (début du cooldown)
+let shieldStartTime = 0; // Moment d'activation du bouclier
 let rechargeProgress = 1; // La barre est pleine au début (valeur entre 0 et 1)
 
 // ====== VOL (VERT) ======
@@ -147,6 +179,7 @@ let flyReady = true;
 let flyDuration = 2000; // 2s
 let flyCooldown = 7000; // 7s
 let lastFlyTime = 0;
+let flyStartTime = 0;
 let flyFalling = false; // Invincibilité pendant la descente après le vol
 
 // ====== RALENTISSEMENT (VIOLET) ======
@@ -155,6 +188,7 @@ let slowmoReady = true;
 let slowmoDuration = 3000; // 3s
 let slowmoCooldown = 14000; // 14s
 let lastSlowmoTime = 0;
+let slowmoStartTime = 0;
 let slowmoMultiplier = 0.5; // Ralentir à 50% de la vitesse
 
 // ====== AGILITÉ ACCRUE (ORANGE) ======
@@ -163,6 +197,7 @@ let agilityReady = true;
 let agilityDuration = 3000; // 3s
 let agilityCooldown = 10000; // 10s
 let lastAgilityTime = 0;
+let agilityStartTime = 0;
 let agilityVelocityBoost = 1.3; // Augmente la vélocité du saut de 30% (plus rapide mais meme hauteur)
 
 // ====== TIR (ROUGE) ======
@@ -176,6 +211,7 @@ let scoreMultiplierReady = true;
 let scoreMultiplierDuration = 3000; // 3s
 let scoreMultiplierCooldown = 12000; // 12s
 let lastScoreMultiplierTime = 0;
+let scoreMultiplierStartTime = 0;
 let scoreMultiplier = 1; // Multiplicateur du score (1 = normal, 3 = triple gain)
 
 // ====== AIMANT D'OBSTACLES (CYAN) ======
@@ -184,6 +220,7 @@ let magnetReady = true;
 let magnetDuration = 2000; // 2s
 let magnetCooldown = 10000; // 10s
 let lastMagnetTime = 0;
+let magnetStartTime = 0;
 
 // ====== RÉDUCTION D'OBSTACLES (GRIS) ======
 let shrinkActive = false;
@@ -191,11 +228,21 @@ let shrinkReady = true;
 let shrinkDuration = 4000; // 4s
 let shrinkCooldown = 13000; // 13s
 let lastShrinkTime = 0;
+let shrinkStartTime = 0;
 let shrinkFactor = 0.5; // obstacles rendered at 50% size when active
 
+// ====== ARRÊT DU TEMPS (ROSE) ======
+let timeStopActive = false;
+let timeStopReady = true;
+let timeStopDuration = 3000; // 3s
+let timeStopCooldown = 15000; // 15s
+let lastTimeStopTime = 0;
+let timeStopStartTime = 0;
+let timeStopJustEnded = false; // Délai d'1 seconde après la fin pour pas de génération immédiate
+
 // ====== COURONNES POUR LES NIVEAUX ======
-let currentLevels = { red: 1, blue: 1, green: 1, yellow: 1, purple: 1, orange: 1 };
-let levelUpFlags = { red: false, blue: false, green: false, yellow: false, purple: false, orange: false };
+let currentLevels = { red: 1, blue: 1, green: 1, yellow: 1, purple: 1, orange: 1, cyan: 1, gray: 1, pink: 1 };
+let levelUpFlags = { red: false, blue: false, green: false, yellow: false, purple: false, orange: false, cyan: false, gray: false, pink: false };
 
 // ====== NIVEAUX PAR CUBE ======
 // Chaque palier de 1000 points augmente d'1 niveau, niveaux 1..100
@@ -203,7 +250,7 @@ function getLevelFromScore(s) {
   return Math.min(100, Math.floor(s / 1000) + 1);
 }
 
-// ====== SAUT (CLIC / TAP) ======
+// ====== SAUT (CLIC / TAP / ESPACE) ======
 function jump() {
   if (!player.jumping) {
     // Premier saut
@@ -212,14 +259,24 @@ function jump() {
     if (player.type === 'orange' && agilityActive) {
       jumpForce *= agilityVelocityBoost;
     }
+    // Violet (ralentissement) : saute moins haut quand le pouvoir est actif
+    if (player.type === 'purple' && slowmoActive) {
+      jumpForce *= 0.7; // Saute à 70% de la hauteur normale
+    }
     player.velocityY = jumpForce;
     player.jumping = true;
     // Réinitialise les flags liés au bouclier si besoin
-  } else {
-    // Si le joueur clique en l'air et que le pouvoir est prêt, l'activer
-    activateAbility();
   }
+  // Note: Le pouvoir n'est activé que via clic droit ou le bouton mobile, pas avec le clic gauche
 }
+
+// Ajouter espace pour sauter
+document.addEventListener('keydown', function(e) {
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault();
+    jump();
+  }
+});
 
 // Saut n'importe où sur l'écran avec clic gauche ou touch (sauf sur les boutons de sélection)
 document.addEventListener("mousedown", function(e) {
@@ -250,6 +307,7 @@ function activateAbility() {
     if (!shieldReady || shieldActive) return;
     shieldActive = true;
     shieldReady = false;
+    shieldStartTime = Date.now();
     setTimeout(function() {
       shieldActive = false;
       lastShieldTime = Date.now();
@@ -258,6 +316,7 @@ function activateAbility() {
     if (!flyReady || flyActive) return;
     flyActive = true;
     flyReady = false;
+    flyStartTime = Date.now();
     // Désactiver la gravité pendant la durée
     setTimeout(function() {
       flyActive = false;
@@ -269,6 +328,7 @@ function activateAbility() {
     if (!scoreMultiplierReady || scoreMultiplierActive) return;
     scoreMultiplierActive = true;
     scoreMultiplierReady = false;
+    scoreMultiplierStartTime = Date.now();
     scoreMultiplier = 3; // Triple le gain de score
     setTimeout(function() {
       scoreMultiplierActive = false;
@@ -279,6 +339,7 @@ function activateAbility() {
     if (!slowmoReady || slowmoActive) return;
     slowmoActive = true;
     slowmoReady = false;
+    slowmoStartTime = Date.now();
     setTimeout(function() {
       slowmoActive = false;
       lastSlowmoTime = Date.now();
@@ -287,6 +348,7 @@ function activateAbility() {
     if (!agilityReady || agilityActive) return;
     agilityActive = true;
     agilityReady = false;
+    agilityStartTime = Date.now();
     setTimeout(function() {
       agilityActive = false;
       lastAgilityTime = Date.now();
@@ -296,6 +358,7 @@ function activateAbility() {
     if (!shrinkReady || shrinkActive) return;
     shrinkActive = true;
     shrinkReady = false;
+    shrinkStartTime = Date.now();
     setTimeout(function() {
       shrinkActive = false;
       lastShrinkTime = Date.now();
@@ -305,6 +368,7 @@ function activateAbility() {
     if (!magnetReady || magnetActive) return;
     magnetActive = true;
     magnetReady = false;
+    magnetStartTime = Date.now();
     setTimeout(function() {
       magnetActive = false;
       lastMagnetTime = Date.now();
@@ -317,6 +381,20 @@ function activateAbility() {
       autoShoot();
       lastRedShot = now;
     }
+  } else if (player.type === 'pink') {
+    if (!timeStopReady || timeStopActive) return;
+    timeStopActive = true;
+    timeStopReady = false;
+    timeStopStartTime = Date.now();
+    setTimeout(function() {
+      timeStopActive = false;
+      timeStopJustEnded = true; // Empêcher la génération immédiate pendant 1s
+      lastTimeStopTime = Date.now();
+      // Après 1 seconde, autoriser la génération à nouveau
+      setTimeout(function() {
+        timeStopJustEnded = false;
+      }, 1000);
+    }, timeStopDuration);
   }
 }
 
@@ -339,6 +417,8 @@ function createObstacle() {
 // Sélectionner le type de joueur
 function selectType(t) {
   player.type = t;
+  // Mettre à jour l'emoji du bouton pouvoir
+  updatePowerButton();
   // Verrouiller le choix : désactiver tous les boutons du sélecteur
   const btns = document.querySelectorAll('#selector button');
   btns.forEach(b => {
@@ -372,13 +452,33 @@ function selectType(t) {
   } else if (t === 'gray') {
     // réinitialiser réduction
     shrinkActive = false; shrinkReady = true; lastShrinkTime = 0;
+  } else if (t === 'pink') {
+    // réinitialiser arrêt du temps
+    timeStopActive = false; timeStopReady = true; lastTimeStopTime = 0;
   }
+}
+
+// Mettre à jour l'emoji du bouton pouvoir selon le type de cube
+function updatePowerButton() {
+  const powerBtn = document.getElementById('powerBtn');
+  const emojis = {
+    red: '🔫',
+    blue: '🛡️',
+    green: '🕊️',
+    yellow: '⚡x3',
+    purple: '⏱️',
+    orange: '⚡',
+    cyan: '🧲',
+    gray: '⇳',
+    pink: '⏱'
+  };
+  powerBtn.textContent = emojis[player.type] || '⚡';
 }
 
 // Mettre à jour l'affichage des meilleurs niveaux
 function updateBestLevelsDisplay() {
   // Mettre à jour les niveaux et détecter les level-ups
-  ['red', 'blue', 'green', 'cyan', 'yellow', 'purple', 'orange', 'gray'].forEach(color => {
+  ['red', 'blue', 'green', 'cyan', 'yellow', 'purple', 'orange', 'gray', 'pink'].forEach(color => {
     const newLevel = getLevelFromScore(bestScores[color]);
     const levelElement = document.getElementById(color + 'Level');
     
@@ -422,6 +522,8 @@ let gameStartTime = Date.now(); // Enregistrer le moment où le jeu commence
 let lastObstacleTime = 0;
 let obstacleInterval = setInterval(() => {
   let now = Date.now();
+  // Ne pas générer d'obstacles si le temps est arrêté (rose) ou vient juste de s'arrêter
+  if (timeStopActive || timeStopJustEnded) return;
   // Ralentir le spawnRate si le violet est actif
   let effectiveSpawnRate = slowmoActive ? spawnRate / slowmoMultiplier : spawnRate;
   if (now - lastObstacleTime >= effectiveSpawnRate) {
@@ -523,7 +625,8 @@ function gameOverScreen() {
     "🟡 Jaune : " + getLevelFromScore(bestScores.yellow) + "\n" +
     "🟣 Violet : " + getLevelFromScore(bestScores.purple) + "\n" +
     "🟠 Orange : " + getLevelFromScore(bestScores.orange) + "\n" +
-    "🔘 Gris : " + getLevelFromScore(bestScores.gray)
+    "🔘 Gris : " + getLevelFromScore(bestScores.gray) + "\n" +
+    "💗 Rose : " + getLevelFromScore(bestScores.pink)
   );
 
   // Proposer de soumettre le score
@@ -546,7 +649,7 @@ function update() {
 
   // Score (n'augmente que si le joueur a choisi un cube)
   if (player.type) scores[player.type] += 5 * scoreMultiplier;
-  const totalScore = scores.red + scores.blue + scores.green + scores.yellow + scores.purple + scores.orange + scores.cyan + scores.gray;
+  const totalScore = scores.red + scores.blue + scores.green + scores.yellow + scores.purple + scores.orange + scores.cyan + scores.gray + scores.pink;
   
   // Mettre à jour l'affichage des couronnes en temps réel
   updateBestLevelsDisplay();
@@ -554,7 +657,7 @@ function update() {
   ctx.fillStyle = "white";
   ctx.font = "16px Arial";
   ctx.fillText("Meilleur score : " + bestScore, 10, 20);
-  ctx.fillText("Niveaux R/B/V/BL/J/P/O/G : " + getLevelFromScore(scores.red) + " / " + getLevelFromScore(scores.blue) + " / " + getLevelFromScore(scores.green) + " / " + getLevelFromScore(scores.cyan) + " / " + getLevelFromScore(scores.yellow) + " / " + getLevelFromScore(scores.purple) + " / " + getLevelFromScore(scores.orange) + " / " + getLevelFromScore(scores.gray), 10, 40);
+  ctx.fillText("Niveaux R/B/V/BL/J/P/O/G/Ro : " + getLevelFromScore(scores.red) + " / " + getLevelFromScore(scores.blue) + " / " + getLevelFromScore(scores.green) + " / " + getLevelFromScore(scores.cyan) + " / " + getLevelFromScore(scores.yellow) + " / " + getLevelFromScore(scores.purple) + " / " + getLevelFromScore(scores.orange) + " / " + getLevelFromScore(scores.gray) + " / " + getLevelFromScore(scores.pink), 10, 40);
   
   // Afficher le score du cube sélectionné
   if (player.type === 'red') {
@@ -581,6 +684,9 @@ function update() {
   } else if (player.type === 'gray') {
     ctx.fillStyle = "gray";
     ctx.fillText("🔘 Gris : " + scores.gray, 10, 60);
+  } else if (player.type === 'pink') {
+    ctx.fillStyle = "#FF69B4";
+    ctx.fillText("💗 Rose : " + scores.pink, 10, 60);
   }
   // Affichage du multiplicateur de score si actif
   if (scoreMultiplierActive) {
@@ -589,9 +695,92 @@ function update() {
     ctx.fillText("x" + scoreMultiplier, canvas.width / 2 - 10, 50);
   }
 
+  // Affichage du temps arrêté si actif
+  if (timeStopActive) {
+    ctx.fillStyle = "#FF69B4";
+    ctx.font = "bold 28px Arial";
+    ctx.fillText("⏱ TEMPS ARRÊTÉ", canvas.width / 2 - 70, 50);
+  }
+
+  // Affichage du pouvoir actif et du cooldown
+  const now = Date.now();
+  let powerText = "";
+  let timeRemaining = 0;
+  
+  if (player.type === 'blue') {
+    if (shieldActive) {
+      timeRemaining = Math.ceil((shieldDuration - (now - shieldStartTime)) / 1000);
+      powerText = `🛡️ ACTIF: ${Math.max(1, timeRemaining)}s`;
+    } else if (!shieldReady && lastShieldTime) {
+      timeRemaining = Math.ceil((shieldCooldown - (now - lastShieldTime)) / 1000);
+      powerText = `🛡️ Cooldown: ${Math.max(1, timeRemaining)}s`;
+    }
+  } else if (player.type === 'green') {
+    if (flyActive) {
+      timeRemaining = Math.ceil((flyDuration - (now - flyStartTime)) / 1000);
+      powerText = `🕊️ ACTIF: ${Math.max(1, timeRemaining)}s`;
+    } else if (!flyReady && lastFlyTime) {
+      timeRemaining = Math.ceil((flyCooldown - (now - lastFlyTime)) / 1000);
+      powerText = `🕊️ Cooldown: ${Math.max(1, timeRemaining)}s`;
+    }
+  } else if (player.type === 'yellow') {
+    if (scoreMultiplierActive) {
+      timeRemaining = Math.ceil((scoreMultiplierDuration - (now - scoreMultiplierStartTime)) / 1000);
+      powerText = `⚡ ACTIF: ${Math.max(1, timeRemaining)}s`;
+    } else if (!scoreMultiplierReady && lastScoreMultiplierTime) {
+      timeRemaining = Math.ceil((scoreMultiplierCooldown - (now - lastScoreMultiplierTime)) / 1000);
+      powerText = `⚡ Cooldown: ${Math.max(1, timeRemaining)}s`;
+    }
+  } else if (player.type === 'purple') {
+    if (slowmoActive) {
+      timeRemaining = Math.ceil((slowmoDuration - (now - slowmoStartTime)) / 1000);
+      powerText = `⏱️ ACTIF: ${Math.max(1, timeRemaining)}s`;
+    } else if (!slowmoReady && lastSlowmoTime) {
+      timeRemaining = Math.ceil((slowmoCooldown - (now - lastSlowmoTime)) / 1000);
+      powerText = `⏱️ Cooldown: ${Math.max(1, timeRemaining)}s`;
+    }
+  } else if (player.type === 'orange') {
+    if (agilityActive) {
+      timeRemaining = Math.ceil((agilityDuration - (now - agilityStartTime)) / 1000);
+      powerText = `⚡ ACTIF: ${Math.max(1, timeRemaining)}s`;
+    } else if (!agilityReady && lastAgilityTime) {
+      timeRemaining = Math.ceil((agilityCooldown - (now - lastAgilityTime)) / 1000);
+      powerText = `⚡ Cooldown: ${Math.max(1, timeRemaining)}s`;
+    }
+  } else if (player.type === 'cyan') {
+    if (magnetActive) {
+      timeRemaining = Math.ceil((magnetDuration - (now - magnetStartTime)) / 1000);
+      powerText = `🧲 ACTIF: ${Math.max(1, timeRemaining)}s`;
+    } else if (!magnetReady && lastMagnetTime) {
+      timeRemaining = Math.ceil((magnetCooldown - (now - lastMagnetTime)) / 1000);
+      powerText = `🧲 Cooldown: ${Math.max(1, timeRemaining)}s`;
+    }
+  } else if (player.type === 'gray') {
+    if (shrinkActive) {
+      timeRemaining = Math.ceil((shrinkDuration - (now - shrinkStartTime)) / 1000);
+      powerText = `⇳ ACTIF: ${Math.max(1, timeRemaining)}s`;
+    } else if (!shrinkReady && lastShrinkTime) {
+      timeRemaining = Math.ceil((shrinkCooldown - (now - lastShrinkTime)) / 1000);
+      powerText = `⇳ Cooldown: ${Math.max(1, timeRemaining)}s`;
+    }
+  } else if (player.type === 'pink') {
+    if (timeStopActive) {
+      timeRemaining = Math.ceil((timeStopDuration - (now - timeStopStartTime)) / 1000);
+      powerText = `💗 ACTIF: ${Math.max(1, timeRemaining)}s`;
+    } else if (!timeStopReady && lastTimeStopTime) {
+      timeRemaining = Math.ceil((timeStopCooldown - (now - lastTimeStopTime)) / 1000);
+      powerText = `💗 Cooldown: ${Math.max(1, timeRemaining)}s`;
+    }
+  }
+  
+  if (powerText) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    ctx.font = "14px Arial";
+    ctx.fillText(powerText, 10, 80);
+  }
+
   // Gestion du bouclier / recharge
   // Gestion des capacités et de la recharge selon le type sélectionné
-  const now = Date.now();
   if (player.type === 'blue') {
     if (!shieldActive && lastShieldTime && now - lastShieldTime > shieldCooldown) shieldReady = true;
     if (shieldActive) {
@@ -627,6 +816,14 @@ function update() {
     } else if (!shrinkReady) {
       rechargeProgress = (now - lastShrinkTime) / shrinkCooldown;
       if (rechargeProgress >= 1) { rechargeProgress = 1; shrinkReady = true; }
+    } else rechargeProgress = 1;
+  } else if (player.type === 'pink') {
+    if (!timeStopActive && lastTimeStopTime && now - lastTimeStopTime > timeStopCooldown) timeStopReady = true;
+    if (timeStopActive) {
+      rechargeProgress = 0;
+    } else if (!timeStopReady) {
+      rechargeProgress = (now - lastTimeStopTime) / timeStopCooldown;
+      if (rechargeProgress >= 1) { rechargeProgress = 1; timeStopReady = true; }
     } else rechargeProgress = 1;
   } else if (player.type === 'purple') {
     if (!slowmoActive && lastSlowmoTime && now - lastSlowmoTime > slowmoCooldown) slowmoReady = true;
@@ -673,13 +870,19 @@ function update() {
     player.y = 220;
     player.velocityY = 0;
     player.jumping = false;
-    // Le joueur a atterri : terminer la période d'invincibilité post-vol
-    if (flyFalling) flyFalling = false;
+    // Le joueur a atterri : prolonger l'invincibilité post-vol pour 2 secondes
+    if (flyFalling) {
+      // Garder flyFalling = true pour 1,5 secondes après l'atterrissage
+      setTimeout(function() {
+        flyFalling = false;
+      }, 1500);
+    }
   }
   // Effets de vol si actif (vert)
   if (player.type === 'green' && flyActive) {
     // Soulever légèrement le joueur et neutraliser la gravité temporairement
-    player.y = Math.max(50, player.y - 2);
+    // Vol plus bas et plus lent
+    player.y = Math.max(100, player.y - 1);
     player.velocityY = 0;
   }
 
@@ -707,6 +910,9 @@ function update() {
     } else if (player.type === 'gray') {
       // Le cube gris indique son état quand la réduction est active
       ctx.fillStyle = shrinkActive ? "#A9A9A9" : "gray";
+  } else if (player.type === 'pink') {
+    // Le cube rose brille si arrêt du temps actif
+    ctx.fillStyle = timeStopActive ? "#FF1493" : "#FF69B4";
   } else {
     ctx.fillStyle = "white"; // par défaut
   }
@@ -740,13 +946,16 @@ function update() {
   } else if (player.type === 'gray' && shrinkReady && !shrinkActive) {
     ctx.fillStyle = "gray"; ctx.font = "12px Arial"; ctx.fillText("⇳ SMALL", player.x - 18, player.y - 10);
     ctx.strokeStyle = "gray"; ctx.lineWidth = 1; ctx.strokeRect(player.x - 5, player.y - 5, player.width + 10, player.height + 10);
+  } else if (player.type === 'pink' && timeStopReady && !timeStopActive) {
+    ctx.fillStyle = "#FF69B4"; ctx.font = "12px Arial"; ctx.fillText("⏱ READY", player.x - 12, player.y - 10);
+    ctx.strokeStyle = "#FF69B4"; ctx.lineWidth = 2; ctx.strokeRect(player.x - 5, player.y - 5, player.width + 10, player.height + 10);
   }
 
-  
   // Obstacles
   // Dessiner et gérer collisions (si bouclier actif, aucune perte)
   obstacles.forEach((obs, index) => {
-    let effectiveSpeed = obs.speed * (slowmoActive ? slowmoMultiplier : 1);
+    // Si l'arrêt du temps est actif, les obstacles ne se déplacent pas
+    let effectiveSpeed = timeStopActive ? 0 : obs.speed * (slowmoActive ? slowmoMultiplier : 1);
     
     // Aimant : attirer les obstacles vers le joueur
     if (player.type === 'cyan' && magnetActive) {
@@ -826,4 +1035,3 @@ update();
 
 </body>
 </html>
-
