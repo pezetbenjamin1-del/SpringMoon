@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier des Matchs - Gentle Mates</title>
+    <style>
+        /* ========== RESET & STYLES GLOBAUX ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff78bb 0%, #ff78bb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ========== CONTENEUR PRINCIPAL ========== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* ========== HEADER (LOGO) ========== */
+        .header {
+            background: linear-gradient(135deg, #ff78bb 0%, #ff78bb 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .filters {
+            padding: 20px;
+            background: #f5f5f5;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #ec4899;
+            background: white;
+            color: #ec4899;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #ec4899;
+            color: white;
+        }
+
+        .filter-btn:hover {
+            background: #ec4899;
+            color: white;
+        }
+
+        .panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+
+        .panel h3 {
+            margin-bottom: 12px;
+            color: #111827;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            outline: none;
+            font-size: 0.95em;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        .form-actions {
+            margin-top: 16px;
+        }
+
+        .btn-primary {
+            background: #db2777;
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: #be185d;
+        }
+
+        .form-note {
+            margin-top: 10px;
+            color: #475569;
+            font-size: 0.95em;
+        }
+
+        .form-message {
+            margin-top: 12px;
+            color: #155e75;
+            font-size: 0.95em;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        /* ========== TABLEAUX & CELLULES ========== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f5f5f5;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            color: #ff67b3;
+            border-bottom: 2px solid #ddd;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr {
+            transition: background 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        /* ========== BADGES JEUX (ROSE #ff67b3) ========== */
+        .game-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .valorant { background: #ff67b3; }
+        .fortnite { background: #ff67b3; }
+        .tft { background: #ff67b3; }
+        .rocket-league { background: #ff67b3; }
+        .age-of-empires { background: #ff67b3; }
+        .call-of-duty { background: #ff67b3; }
+        .warzone { background: #ff67b3; }
+        .counter-strike { background: #ff67b3; }
+        .fgc { background: #ff67b3; }
+
+        .match-link {
+            color: #ff67b3;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .match-link:hover {
+            color: #ff67b3;
+            text-decoration: underline;
+        }
+
+        .time {
+            font-weight: bold;
+            color: #ff67b3;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status.upcoming {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.live {
+            background: #fee2e2;
+            color: #991b1b;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .status.completed {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+
+            .filters {
+                padding: 15px;
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+        }
+
+        .legend {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://liquipedia.net/commons/images/thumb/4/42/Gentle_Mates_2024_darkmode.png/600px-Gentle_Mates_2024_darkmode.png" alt="Gentle Mates Logo" style="height: 150px; margin-bottom: 10px;">
+        </div>
+
+
+
+        <div class="content">
+
+            <div class="next-matches" style="margin-bottom: 25px;">
+                <h2 style="font-size: 1.4em; margin-bottom: 12px; color: #ff67b3;">Page d'information pour chaque jeux</h2>
+                <div id="next-match-container"></div>
+            </div>
+
+            <div style="margin-bottom: 20px; color: #475569; font-size: 0.95em;">
+                Dernière mise à jour : <span id="updated-at">--</span>
+            </div>
+
+            <div id="table-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // ========== DONNÉES PRINCIPALES ==========
+        // Données des matchs - Aucun match réel connu actuellement.
+        // Remplacez le tableau ci-dessous par des données réelles depuis Liquipedia.
+        const matches = [];
+
+        // Tableau des prochains matchs par jeu (scraped depuis Liquipedia)
+        const nextMatches = [
+            { game: 'valorant', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/valorant/Gentle_Mates' },
+            { game: 'fortnite', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/fortnite/Gentle_Mates' },
+            { game: 'tft', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/tft/Gentle_Mates' },
+            { game: 'rocket-league', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/rocketleague/Gentle_Mates' },
+            { game: 'age-of-empires', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/ageofempires/Gentle_Mates' },
+            { game: 'call-of-duty', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/callofduty/Paris_Gentle_Mates' },
+            { game: 'warzone', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/callofduty/Gentle_Mates/Warzone' },
+            { game: 'counter-strike', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/counterstrike/Gentle_Mates' },
+            { game: 'fgc', opponent: 'À renseigner', date: '-', time: '-', link: 'https://liquipedia.net/fighters/Gentle_Mates' }
+        ];
+
+        let currentFilter = 'all';
+
+        // ========== FONCTIONS UTILITAIRES ==========
+
+        // Vérifie si une date est dans la semaine en cours (< 7 jours)
+        function isWithinAWeek(dateString) {
+            try {
+                // Essayer de parser la date
+                const matchDate = new Date(dateString);
+                if (isNaN(matchDate.getTime())) return false;
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                
+                return matchDate >= today && matchDate <= nextWeek;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Met à jour l'entrée du prochain match pour un jeu donné
+        function setNextMatch(game, opponent, date, time, link) {
+            const index = nextMatches.findIndex(match => match.game === game);
+            if (index !== -1) {
+                nextMatches[index] = { game, opponent, date, time, link };
+            }
+        }
+
+        // ========== SCRAPING LIQUIPEDIA ==========
+
+        // Récupère les prochains matchs depuis les 9 pages Liquipedia
+        function fetchNextMatches() {
+            const games = [
+                { key: 'valorant', url: 'https://liquipedia.net/valorant/Gentle_Mates' },
+                { key: 'fortnite', url: 'https://liquipedia.net/fortnite/Gentle_Mates' },
+                { key: 'tft', url: 'https://liquipedia.net/tft/Gentle_Mates' },
+                { key: 'rocket-league', url: 'https://liquipedia.net/rocketleague/Gentle_Mates' },
+                { key: 'age-of-empires', url: 'https://liquipedia.net/ageofempires/Gentle_Mates' },
+                { key: 'call-of-duty', url: 'https://liquipedia.net/callofduty/Paris_Gentle_Mates' },
+                { key: 'warzone', url: 'https://liquipedia.net/callofduty/Gentle_Mates/Warzone' },
+                { key: 'counter-strike', url: 'https://liquipedia.net/counterstrike/Gentle_Mates' },
+                { key: 'fgc', url: 'https://liquipedia.net/fighters/Gentle_Mates' }
+            ];
+
+            games.forEach(game => {
+                fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(game.url))
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.contents) {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(data.contents, 'text/html');
+                            
+                            // Chercher les sections "Upcoming Matches" ou "Next Matches" ou "Live"
+                            const headings = doc.querySelectorAll('h2, h3, span.mw-headline');
+                            let matchFound = false;
+                            
+                            for (let heading of headings) {
+                                const headingText = heading.textContent.toLowerCase();
+                                let status = 'upcoming';
+                                
+                                // Déterminer le statut
+                                if (headingText.includes('live') || headingText.includes('en direct')) {
+                                    status = 'live';
+                                } else if (headingText.includes('upcoming') || headingText.includes('next') || headingText.includes('scheduled')) {
+                                    status = 'upcoming';
+                                } else {
+                                    continue;
+                                }
+                                
+                                // Chercher le tableau après ce heading
+                                let nextElement = heading.closest('h2, h3')?.nextElementSibling;
+                                while (nextElement && !matchFound) {
+                                    if (nextElement.tagName === 'TABLE') {
+                                        const tableText = nextElement.textContent;
+                                        const rows = nextElement.querySelectorAll('tbody tr');
+                                        
+                                        // Vérifier si "Upcoming Match" ou "Live" est dans le tableau
+                                        if (tableText.includes('Upcoming') || tableText.includes('upcoming')) {
+                                            setNextMatch(game.key, 'Upcoming Match', '📅', '⏰', game.url);
+                                            matches.push({ game: game.key, opponent: 'Upcoming Match', date: '-', time: '-', status: 'upcoming', link: game.url });
+                                            matchFound = true;
+                                        } else if (tableText.includes('Live') || tableText.includes('EN DIRECT')) {
+                                            setNextMatch(game.key, 'En direct', '🔴', 'LIVE', game.url);
+                                            matches.push({ game: game.key, opponent: 'En direct', date: '-', time: 'LIVE', status: 'live', link: game.url });
+                                            matchFound = true;
+                                        } else if (rows.length > 0) {
+                                            // Extraire les détails du match
+                                            const firstRow = rows[0];
+                                            const cells = firstRow.querySelectorAll('td, th');
+                                            if (cells.length >= 2) {
+                                                const opponent = cells[0]?.textContent.trim() || 'À renseigner';
+                                                const date = cells[cells.length - 1]?.textContent.trim() || '-';
+                                                setNextMatch(game.key, opponent, date, '20:00', game.url);
+                                                matches.push({ game: game.key, opponent, date, time: '20:00', status, link: game.url });
+                                                matchFound = true;
+                                            }
+                                        }
+                                        break;
+                                    }
+                                    nextElement = nextElement.nextElementSibling;
+                                }
+                                if (matchFound) break;
+                            }
+                        }
+                    })
+                    .catch(err => console.log('Erreur pour ' + game.key, err));
+            });
+        }
+
+        function showFormMessage(message) {
+            const messageEl = document.getElementById('form-message');
+            messageEl.textContent = message;
+            setTimeout(() => {
+                messageEl.textContent = '';
+            }, 5000);
+        }
+
+        function addMatch(event) {
+            event.preventDefault();
+            const form = event.target;
+            const game = form.game.value;
+            const opponent = form.opponent.value.trim();
+            const date = form.date.value;
+            const time = form.time.value;
+            const status = form.status.value;
+            const link = form.link.value.trim();
+
+            if (!opponent || !date || !time || !link) {
+                showFormMessage('Veuillez remplir tous les champs.');
+                return;
+            }
+
+            matches.push({ game, opponent, date, time, status, link });
+            if (status === 'upcoming') {
+                setNextMatch(game, opponent, date, time, link);
+            }
+
+            renderTable();
+            renderNextMatches();
+            updateTimestamp();
+            form.reset();
+            showFormMessage('Match ajouté avec succès.');
+        }
+
+        function getGameLabel(game) {
+            const labels = {
+                'valorant': 'Valorant',
+                'fortnite': 'Fortnite',
+                'tft': 'Team Fight Tactique',
+                'rocket-league': 'Rocket League',
+                'age-of-empires': 'Age of Empires',
+                'call-of-duty': 'Call of Duty',
+                'warzone': 'Call of Duty Warzone',
+                'counter-strike': 'Counter-Strike',
+                'fgc': 'FGC'
+            };
+            return labels[game] || game;
+        }
+
+        // Obtient le label français d'un statut
+        function getStatusLabel(status) {
+            const labels = {
+                'upcoming': 'À venir',
+                'live': 'EN DIRECT',
+                'completed': 'Terminé'
+            };
+            return labels[status] || status;
+        }
+
+        // ========== RENDU DES TABLEAUX ==========
+
+        // Rend le tableau principal (tous les matchs)
+        function renderTable() {
+            const filteredMatches = currentFilter === 'all' 
+                ? matches 
+                : matches.filter(m => m.game === currentFilter);
+
+            const tableContainer = document.getElementById('table-container');
+
+            if (filteredMatches.length === 0) {
+                tableContainer.innerHTML = '';
+                return;
+            }
+
+            // Trier par date
+            filteredMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Jeu</th>
+                            <th>Adversaire</th>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            filteredMatches.forEach(match => {
+                const date = new Date(match.date);
+                const dateFormatted = date.toLocaleDateString('fr-FR', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+
+                html += `
+                    <tr>
+                        <td><span class="game-badge ${match.game}">${getGameLabel(match.game)}</span></td>
+                        <td><a href="${match.link}" class="match-link" target="_blank">${match.opponent}</a></td>
+                        <td>${dateFormatted}</td>
+                        <td><span class="time">${match.time}</span></td>
+                        <td><span class="status ${match.status}">${getStatusLabel(match.status)}</span></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            tableContainer.innerHTML = html;
+        }
+
+        // Rend le tableau "Page d'information pour chaque jeux" (Jeu + Source Liquipedia)
+        function renderNextMatches() {
+            const container = document.getElementById('next-match-container');
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Jeu</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            nextMatches.forEach(match => {
+                const withinWeek = isWithinAWeek(match.date);
+                
+                html += `
+                    <tr style="${withinWeek ? 'background: rgba(236, 72, 153, 0.1);' : ''}">
+                        <td><span class="game-badge ${match.game}">${getGameLabel(match.game)}</span></td>
+                        <td><a href="${match.link}" class="match-link" target="_blank">Liquipedia</a></td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // ========== INTERACTIONS & MISES À JOUR ==========
+
+        // Change le filtre de jeu actif
+        function filterByGame(game, event) {
+            currentFilter = game;
+
+            // Mettre à jour les boutons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            renderTable();
+        }
+
+        // Met à jour le timestamp de "Dernière mise à jour"
+        function updateTimestamp() {
+            const date = new Date();
+            document.getElementById('updated-at').textContent = date.toLocaleString('fr-FR', {
+                weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        // ========== INITIALISATION & BOUCLES ==========
+
+        // Au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchNextMatches();
+            renderNextMatches();
+            renderTable();
+            updateTimestamp();
+            document.getElementById('match-form')?.addEventListener('submit', addMatch);
+            
+            // Mettre à jour l'affichage après 2 secondes pour permettre au scraping de terminer
+            setTimeout(() => {
+                renderNextMatches();
+            }, 2000);
+        });
+
+        // Mise à jour automatique toutes les 60 secondes (1 minute)
+        setInterval(() => {
+            renderTable();
+            renderNextMatches();
+            updateTimestamp();
+        }, 60000);
+    </script>
+</body>
+</html>
